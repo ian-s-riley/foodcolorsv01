@@ -1,20 +1,63 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
 
-export default function App() {
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator } from 'react-native';
+
+import {
+  NativeBaseProvider,
+  View,
+} from 'native-base';
+
+//screens for un-authed users
+import Welcome from './src/Welcome';
+
+//screens for auth users
+import Home from './src/Home';
+
+const AuthStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
+
+const Initializing = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="skyblue" />
     </View>
+  );
+};
+
+function MyAuthStack() {
+  return (
+    <AuthStack.Navigator>
+      <AuthStack.Screen name="Home" component={Welcome} />
+    </AuthStack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function MyAppStack() {
+  return (
+    <AppStack.Navigator>
+      <AppStack.Screen name="Home">{Home}</AppStack.Screen>
+    </AppStack.Navigator>
+  );
+}
+
+function App() {
+  const [isUserLoggedIn, setUserLoggedIn] = useState('initializing');
+
+  return (
+    <NavigationContainer>
+      <NativeBaseProvider>
+        {isUserLoggedIn === 'initializing' && <Initializing />}
+        {isUserLoggedIn === 'loggedIn' && (
+          <MyAppStack />
+        )}
+        {isUserLoggedIn === 'loggedOut' && (
+          <MyAuthStack />
+        )}
+      </NativeBaseProvider>
+    </NavigationContainer>
+  );
+}
+
+export default App
